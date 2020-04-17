@@ -1,8 +1,9 @@
 import boto3
 import json
+import os
 
-cp = boto3.client("codepipeline")
-sqs = boto3.resource("sqs")
+cp = boto3.client("codepipeline", region_name=os.environ["region"])
+sqs = boto3.resource("sqs", region_name=os.environ["region"])
 
 def get_pipeline_execution(pipeline_name, exec_id):
   pipeline_exec = cp.get_pipeline_execution(
@@ -23,9 +24,9 @@ def get_pipeline_details(pipeline_name):
   for stage in stages:
     if stage["name"] == "Source":
       action = stage["actions"][0]
-        owner = action["configuration"]["Owner"]
-        repo = action["configuration"]["Repo"]
-        branch = action["configuration"]["Branch"]
+      owner = action["configuration"]["Owner"]
+      repo = action["configuration"]["Repo"]
+      branch = action["configuration"]["Branch"]
   return {
     "owner": owner,
     "repo": repo,
@@ -33,8 +34,7 @@ def get_pipeline_details(pipeline_name):
   }    
 
 def process_record(record):
-  record_decoded = json.loads(record)
-  msg = json.loads(record_decoded["Message"])
+  msg = json.loads(record["Message"])
   pipeline_name = msg["detail"]["pipeline"]
   exec_id = msg["detail"]["execution-id"]
   state = msg["detail"]["state"]
@@ -50,11 +50,18 @@ def process_record(record):
     "state": state,
     "github": pipeline_details
   }
-  queue = sqs.get_queue_by_name(QueueName='test')
+  print(enriched)
+  queue = sqs.get_queue_by_name(QueueName=os.environ["queue"])
+  queue.send_message(
+    MessageBody=json.dumps(enriched)
+  )
 
 def entry(event, context):
   for record in event["Records"]:
     process_record(record)
 
 if __name__ == "__main__":
-  pass
+  record = {
+    "Message": "{\"account\":\"231965782596\",\"detailType\":\"CodePipeline Pipeline Execution State Change\",\"region\":\"ap-southeast-2\",\"source\":\"aws.codepipeline\",\"time\":\"2020-04-16T22:16:39Z\",\"notificationRuleArn\":\"arn:aws:codestar-notifications:ap-southeast-2:231965782596:notificationrule/e1984e5400185fb3b64f151c60a0428becf5e29b\",\"detail\":{\"pipeline\":\"basic-cicd-pipeline-www-rjk-com-develop-rjk-ecs-dev-www-rjk-com-dev\",\"execution-id\":\"ed501676-0655-4165-9ae7-7f9b0914380a\",\"state\":\"STARTED\",\"version\":1.0},\"resources\":[\"arn:aws:codepipeline:ap-southeast-2:231965782596:basic-cicd-pipeline-www-rjk-com-develop-rjk-ecs-dev-www-rjk-com-dev\"],\"additionalAttributes\":{}}"
+  }
+  process_record(record)
