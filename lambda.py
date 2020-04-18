@@ -34,7 +34,8 @@ def get_pipeline_details(pipeline_name):
   }    
 
 def process_record(record):
-  msg = json.loads(record["Message"])
+  msg = json.loads(record)
+  msg = json.loads(msg["Message"])
   pipeline_name = msg["detail"]["pipeline"]
   exec_id = msg["detail"]["execution-id"]
   state = msg["detail"]["state"]
@@ -58,7 +59,7 @@ def process_record(record):
 
 def entry(event, context):
   for record in event["Records"]:
-    process_record(record)
+    process_record(record["body"])
 
 if __name__ == "__main__":
   record = {
