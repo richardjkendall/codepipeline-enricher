@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+import traceback
 
 cp = boto3.client("codepipeline", region_name=os.environ["region"])
 sqs = boto3.resource("sqs", region_name=os.environ["region"])
@@ -59,7 +60,13 @@ def process_record(record):
 
 def entry(event, context):
   for record in event["Records"]:
-    process_record(record["body"])
+    try:
+      process_record(record["body"])
+    except Exception as err:
+      print("Had an error, skipping...")
+      traceback.print_tb(err.__traceback__)
+      pass
+
 
 if __name__ == "__main__":
   record = {
