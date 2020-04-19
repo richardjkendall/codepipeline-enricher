@@ -35,6 +35,7 @@ def get_pipeline_details(pipeline_name):
   }    
 
 def process_record(record):
+  print(record)
   msg = json.loads(record)
   msg = json.loads(msg["Message"])
   pipeline_name = msg["detail"]["pipeline"]
