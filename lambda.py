@@ -67,10 +67,3 @@ def entry(event, context):
       print("Had an error, skipping...")
       traceback.print_tb(err.__traceback__)
       pass
-
-
-if __name__ == "__main__":
-  record = {
-    "Message": "{\"account\":\"231965782596\",\"detailType\":\"CodePipeline Pipeline Execution State Change\",\"region\":\"ap-southeast-2\",\"source\":\"aws.codepipeline\",\"time\":\"2020-04-16T22:16:39Z\",\"notificationRuleArn\":\"arn:aws:codestar-notifications:ap-southeast-2:231965782596:notificationrule/e1984e5400185fb3b64f151c60a0428becf5e29b\",\"detail\":{\"pipeline\":\"basic-cicd-pipeline-www-rjk-com-develop-rjk-ecs-dev-www-rjk-com-dev\",\"execution-id\":\"ed501676-0655-4165-9ae7-7f9b0914380a\",\"state\":\"STARTED\",\"version\":1.0},\"resources\":[\"arn:aws:codepipeline:ap-southeast-2:231965782596:basic-cicd-pipeline-www-rjk-com-develop-rjk-ecs-dev-www-rjk-com-dev\"],\"additionalAttributes\":{}}"
-  }
-  process_record(record)
